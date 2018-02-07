@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Neeraj Bokde (neerajdhanraj@gmail.com) and Andres Feijoo (afeijoo@uvigo.es)" />
+
+<meta name="date" content="2018-02-07" />
+
+<title>WindCurves: A Tool to Fit Wind Turbine Power Curves</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">WindCurves: A Tool to Fit Wind Turbine Power Curves</h1>
+<h4 class="author"><em>Neeraj Bokde (<a href="mailto:neerajdhanraj@gmail.com">neerajdhanraj@gmail.com</a>) and Andres Feijoo (<a href="mailto:afeijoo@uvigo.es">afeijoo@uvigo.es</a>)</em></h4>
+<h4 class="date"><em>2018-02-07</em></h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction:</h2>
+<p>This is a Vignettes of R package, <code>WindCurves</code>. The package <code>WindCurves</code> is a tool used to fit the wind turbine power curves. It can be useful for researchers, data analysts/scientist, practitioners, statistians and students working on wind turbine power curves. The salient features of <code>WindCurves</code> package are:</p>
+<ul>
+<li>Fit the power curve with Weibull CDF, Logistic [1] and user defined techniques.</li>
+<li>Comparison and visualization of the performance of curve fitting techniques.</li>
+<li>Utilise as a Testbench to compare performace of user defined curve fitting techniques with user defined error measures.</li>
+<li>Availability of Dataset [2] on the power curves of wind turbine from four major manufacturers: Siemens, Vestas, REpower and Nordex.</li>
+<li>Feature to extract/capture Speed Vs Power discrete points from power curve image</li>
+</ul>
+</div>
+<div id="instructions-to-use" class="section level2">
+<h2>Instructions to Use:</h2>
+<ul>
+<li>A power curve can be fitted with the <code>WindCurves</code> package from a discrete samples of wind turbine power curves provided by turbine manufacurers as:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(WindCurves)
+<span class="kw">data</span>(pcurves)
+s &lt;-<span class="st"> </span>pcurves$Speed
+p &lt;-<span class="st"> </span>pcurves$<span class="st">`</span><span class="dt">Nordex N90</span><span class="st">`</span>
+da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(s,p)
+x &lt;-<span class="st"> </span><span class="kw">fitcurve</span>(da)
+<span class="co">#&gt;    Weibull CDF model</span>
+<span class="co">#&gt;    -----------------</span>
+<span class="co">#&gt;    P = 1 - exp[-(S/C)^k]</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     Shape (k) = 4.242446 </span>
+<span class="co">#&gt;     Scale (C) = 9.564993 </span>
+<span class="co">#&gt;    ===================================</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    Logistic Function model</span>
+<span class="co">#&gt;    -----------------------</span>
+<span class="co">#&gt;    P = phi1/(1+exp((phi2-S)/phi3))</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     phi 1 = 2318.242 </span>
+<span class="co">#&gt;     phi 2 = 8.65861 </span>
+<span class="co">#&gt;     phi 3 = 1.366053 </span>
+<span class="co">#&gt;    ===================================</span>
+x
+<span class="co">#&gt; $Speed</span>
+<span class="co">#&gt;  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23</span>
+<span class="co">#&gt; [24] 24 25</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $Power</span>
+<span class="co">#&gt;  [1]    0    0    0   35  175  352  580  870 1237 1623 2012 2230 2300 2300</span>
+<span class="co">#&gt; [15] 2300 2300 2300 2300 2300 2300 2300 2300 2300 2300 2300</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`Weibull CDF`</span>
+<span class="co">#&gt;  [1]    0.0000    0.0000    0.0000   90.3871  175.0000  327.5161  563.9085</span>
+<span class="co">#&gt;  [8]  882.3965 1253.7489 1623.0000 1929.1254 2134.6685 2242.6251 2285.2438</span>
+<span class="co">#&gt; [15] 2297.3355 2299.6816 2299.9764 2299.9990 2300.0000 2300.0000 2300.0000</span>
+<span class="co">#&gt; [22] 2300.0000 2300.0000 2300.0000 2300.0000</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`Logistic Function`</span>
+<span class="co">#&gt;  [1]    0.00000    0.00000    0.00000   74.12813  148.99331  289.70713</span>
+<span class="co">#&gt;  [7]  530.79720  884.98933 1303.20985 1686.50765 1964.36723 2133.40810</span>
+<span class="co">#&gt; [13] 2225.51236 2272.70005 2296.11389 2307.54694 2313.08606 2315.75946</span>
+<span class="co">#&gt; [19] 2317.04738 2317.66729 2317.96554 2318.10900 2318.17801 2318.21119</span>
+<span class="co">#&gt; [25] 2318.22715</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; attr(,&quot;row.names&quot;)</span>
+<span class="co">#&gt;  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23</span>
+<span class="co">#&gt; [24] 24 25</span>
+<span class="co">#&gt; attr(,&quot;class&quot;)</span>
+<span class="co">#&gt; [1] &quot;fitcurve&quot;</span>
+<span class="kw">validate.curve</span>(x)
+<span class="co">#&gt;   Metrics Weibull CDF Logistic Function</span>
+<span class="co">#&gt; 1    RMSE  30.8761687        38.8753476</span>
+<span class="co">#&gt; 2     MAE  15.1381094        29.3213484</span>
+<span class="co">#&gt; 3    MAPE   3.9292946         5.9183795</span>
+<span class="co">#&gt; 4      R2   0.9989322         0.9983073</span>
+<span class="co">#&gt; 5     COR   0.9995413         0.9991591</span>
+<span class="kw">plot</span>(x)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<ul>
+<li><p>User can utilize <code>WindCurves</code> package as a testbench so that a new curve fitting technique can be compared with above mentioned existing environment.</p></li>
+<li><ul>
+<li>The user defined function (similar to <code>random()</code>) should be saved in .R format and it should return the fitted values in terms of “Power values”. The <code>random()</code> function used in this example is stored as .R file with <code>dump()</code> function and made available in the <code>WindCurves</code> package and written as:</li>
+</ul></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">random &lt;-<span class="st"> </span>function(x)
+{
+  data_y &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">1500</span>, <span class="dt">size =</span> <span class="dv">25</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>))
+  d &lt;-<span class="st"> </span><span class="kw">data.frame</span>(data_y)
+  <span class="kw">return</span>(d)
+}
+<span class="kw">dump</span>(<span class="st">&quot;random&quot;</span>)
+<span class="kw">rm</span>(random)</code></pre></div>
+<ul>
+<li>A <code>random()</code> function is attached in the comparison the parameters <code>MethodPath</code> and <code>MethodName</code> as shown below, where <code>MethodPath</code> is a location of the function proposed by the user and <code>MethodName</code> is a name given to the function.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(WindCurves)
+<span class="kw">data</span>(pcurves)
+s &lt;-<span class="st"> </span>pcurves$Speed
+p &lt;-<span class="st"> </span>pcurves$<span class="st">`</span><span class="dt">Nordex N90</span><span class="st">`</span>
+da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(s,p)
+x &lt;-<span class="st"> </span><span class="kw">fitcurve</span>(<span class="dt">data =</span> da, <span class="dt">MethodPath =</span> <span class="st">&quot;source('dumpdata.R')&quot;</span>, <span class="dt">MethodName =</span> <span class="st">&quot;Random values&quot;</span>)
+<span class="co">#&gt;    Weibull CDF model</span>
+<span class="co">#&gt;    -----------------</span>
+<span class="co">#&gt;    P = 1 - exp[-(S/C)^k]</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     Shape (k) = 4.242446 </span>
+<span class="co">#&gt;     Scale (C) = 9.564993 </span>
+<span class="co">#&gt;    ===================================</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    Logistic Function model</span>
+<span class="co">#&gt;    -----------------------</span>
+<span class="co">#&gt;    P = phi1/(1+exp((phi2-S)/phi3))</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     phi 1 = 2318.242 </span>
+<span class="co">#&gt;     phi 2 = 8.65861 </span>
+<span class="co">#&gt;     phi 3 = 1.366053 </span>
+<span class="co">#&gt;    ===================================</span>
+
+## The user can specify .R files from other locations as:
+<span class="co"># x &lt;- fitcurve(data = da, MethodPath = &quot;source('~/WindCurves/R/random.R')&quot;, MethodName = &quot;Random values&quot;)</span>
+<span class="kw">validate.curve</span>(x)
+<span class="co">#&gt;   Metrics Weibull CDF Logistic Function Random values</span>
+<span class="co">#&gt; 1    RMSE  30.8761687        38.8753476  919.51241427</span>
+<span class="co">#&gt; 2     MAE  15.1381094        29.3213484  789.88000000</span>
+<span class="co">#&gt; 3    MAPE   3.9292946         5.9183795   95.19981384</span>
+<span class="co">#&gt; 4      R2   0.9989322         0.9983073    0.05300599</span>
+<span class="co">#&gt; 5     COR   0.9995413         0.9991591    0.94035415</span>
+<span class="kw">plot</span>(x)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<ul>
+<li>Also, <code>WindCurves</code> allows user to add more error measures with <code>validate.curve()</code> function as explained below:</li>
+</ul>
+<p>Consider <code>error()</code> is a function which uses two vectors as input and returns a error value with a specific error measure, such as RMSE or MAPE as shown below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># PCV as an error metric</span>
+error &lt;-<span class="st"> </span>function(a,b)
+{
+d &lt;-<span class="st"> </span>(<span class="kw">var</span>(a) -<span class="st"> </span><span class="kw">var</span>(b)) *<span class="st"> </span><span class="dv">100</span>/<span class="st"> </span><span class="kw">var</span>(a)
+d &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(d)
+<span class="kw">return</span>(d)
+}
+<span class="kw">dump</span>(<span class="st">&quot;error&quot;</span>)
+<span class="kw">rm</span>(error)</code></pre></div>
+<p>The effect of this function can be seen in the results obtained with <code>Validate.curve()</code> function as:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(WindCurves)
+<span class="kw">data</span>(pcurves)
+s &lt;-<span class="st"> </span>pcurves$Speed
+p &lt;-<span class="st"> </span>pcurves$<span class="st">`</span><span class="dt">Nordex N90</span><span class="st">`</span>
+da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(s,p)
+x &lt;-<span class="st"> </span><span class="kw">fitcurve</span>(da)
+<span class="co">#&gt;    Weibull CDF model</span>
+<span class="co">#&gt;    -----------------</span>
+<span class="co">#&gt;    P = 1 - exp[-(S/C)^k]</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     Shape (k) = 4.242446 </span>
+<span class="co">#&gt;     Scale (C) = 9.564993 </span>
+<span class="co">#&gt;    ===================================</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;    Logistic Function model</span>
+<span class="co">#&gt;    -----------------------</span>
+<span class="co">#&gt;    P = phi1/(1+exp((phi2-S)/phi3))</span>
+<span class="co">#&gt;    where P -&gt; Power and S -&gt; Speed </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     phi 1 = 2318.242 </span>
+<span class="co">#&gt;     phi 2 = 8.65861 </span>
+<span class="co">#&gt;     phi 3 = 1.366053 </span>
+<span class="co">#&gt;    ===================================</span>
+<span class="kw">validate.curve</span>(<span class="dt">x =</span> x, <span class="dt">MethodPath =</span> <span class="st">&quot;source('dumpdata.R')&quot;</span>, <span class="dt">MethodName =</span> <span class="st">&quot;New Error&quot;</span>)
+<span class="co">#&gt;     Metrics Weibull CDF Logistic Function</span>
+<span class="co">#&gt; 1      RMSE  30.8761687        38.8753476</span>
+<span class="co">#&gt; 2       MAE  15.1381094        29.3213484</span>
+<span class="co">#&gt; 3      MAPE   3.9292946         5.9183795</span>
+<span class="co">#&gt; 4        R2   0.9989322         0.9983073</span>
+<span class="co">#&gt; 5       COR   0.9995413         0.9991591</span>
+<span class="co">#&gt; 6 New Error  -1.8141636         0.4127479</span>
+<span class="kw">plot</span>(x)</code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAAolBMVEUAAAAAADoAAGYAAP8AOjoAOmYAOpAAZpAAZrYiiyI6AAA6Ojo6ZmY6ZrY6kLY6kNtmAABmADpmAGZmOgBmOpBmZgBmZjpmZmZmZrZmkJBmtrZmtv+QOgCQOmaQkDqQkGaQkNuQtpCQ27aQ29uQ2/+2ZgC2tma225C2/7a2/9u2///bkDrb25Db/7bb/9vb////AAD/tmb/25D//7b//9v////6Q3ScAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAccklEQVR4nO2dC3+rOHqHSWhT29PW6W1ndp12u+1hZnto5xgn/v5frUivBBKIuxC6/J/f/rIYEwGT5+iuV9kTAI/Jjn4AAMaAoMBrICjwGggKvAaCAq+BoMBrrAuaAWCD3QS1nSBIEggKvAaCAq+BoMBrICjwGggKvAaCAq+BoBFy5pjPDpz29GIIGjbGP/Z59GxIFzMg6GHkHPPZgdP6ucE/NrvUfHbgtKcXMyDoQeRGE/Oh08MmzjajY7P8LC9Wv2dnB68Xp5rvm8cwX2+6X85/TfmeJwtBfYIc7Jv4NJ0eyiqf95q+MHRW/53BzyIJ7fvuZ+16eUl7v+eS+z21p1Mf/g5BPWKhoIqJzblBYcyC3vtpmFP25mIGBD2IVlC1VM9z/vfTSnleIt6bIpT+wq2B9+ZM80X7Uz2r/3o3FT8u7v93gqAH0QiqVTtz+aeiz6pz/T9tkxt57RwEDZLcXMR3/37imH9+buqyYXnzkynfOW0+68fFDAh6BHmu5Zstaqao+DduYldFIXf3lubTPl/MgKDuyfMBQYWZObUWFPeGMkVRY+2eNp8N72IGBHWNsR/+KeqbTZHu/LF8BYK6xqSn3laAoAoQ9DBkpavXwDU3ZxMFgu6PeXi9yS5l4wCCmoCgezPYXm8EPea5AgGC7o3s8OwJ2oxgH/FUwQBB96YZzdRPK4NDxzxXIEDQvWlGM/XTqGzOA4LuDRe0N6gpejwh6BQQdG9MjaS77OqEoFNA0L0xCDo+fweoQFD38J4lCDoPCOoa86QdMAAEdcwdueYiIKhT0DO/FAjqkjv0XAoEdQj0XA4E3RW9cwl+LgeC7goXFPOWNgBB94T52UzxhJ5rgKA7kpOgYr780U8TJhB0P3JRwN+fEHQ1EHQ/qIUkoiVB0HVA0N0QLXjqmoegK4Ggu6EKih7QtUDQvYGgm4Cge4P+pU1A0J1B1rkNCLozyEC3AUH3BeObG4Gg+wI/NwJBd6CdwwQ/twJBd6ARFAX8ZiCofZCBWgSC2kfJQA99jiiAoNZphjhRwFsAglpHEfTgJ4kBCGoTJcYN/LTDlKCPS5ZlN3b0+Z5lr9+HjgYTTgg1CNMZgtphQtAq41yFqdxG09FwwgmhbB4HP20xLujXx8s3ZmntYMEsHfwxnHBCaILCTzuMC/q4cPmK1++f728/mLBvP0xHIwknRCsoWvDWmNVIKt5+CFXL1++mo5GEE0IX9OiniYQ5gn6+X+u8lLeUypdvpiMlvYZ9ntdnlEYS/LTFDEG/Pk6sHiplNB2NJJwQeS7XdqCAt8a0oF8frCCfm4P2Ek6IZvER/LTHpKDCQtRBpzmfqQGPAt4iU4JWIntEK34aKSj8tMhUR31TfKMfdBIIugPjgrKhTDFYhJGkSXiQG6ySs8u4oGKkkzuIsfgppKBHP0dUYDaTPRBCZAcgqDVyCLoDENQarJ8e23TZBoLaIs/vIpjy0U8SFRDUHjSHCYJaBYLaQ2SgENQmENQaogYKP60CQW0CO60DQS0CP+0DQS0CQe0DQe0BP3cAgloB6zz2AoJagQkKP/cAglqBFiId/RQxAkFtkGOdx15AUBsgA90NCGoDZKC7AUEtgAx0PyCoBZCB7gcE3Q4y0B2BoNtBBrojEHQzyED3BILaAH7uBgS1AQTdDQhqAfi5HxDUAhB0PyDoduDnjkDQjeQ5BN0TCLqJ8xmC7gsE3QQTFH7uCQTdAjLQ3YGgW0AGujsQdAPn8xOC7gwE3QAy0P2BoOtBBuoACLoeZKAOgKCr4bG+IejOQNBVtJseHv0ksQNBV3A+Q1BXQNAViI08sKecAyDoCiCoOyDoClpBD36QBICgK4Cg7oCgKyBBc+wp5wAIuoIzNj10BgRdAQR1BwRdBRuGRxPeBRB0DTQKzwPTg32BoCvIadNDCOoACLoCIegdgu4PBF0B6wCFoG6AoCugWSIQ1AUQdDlUwENQJ0DQFeS0LzwEdQAEXUFOhqIV7wAIugLqBM0hqAMg6CowiuQKCLoG+OkMCLoCDMO7A4KuAIK6A4IuBJvOuAWCLgSCugWCLgSL4d0CQZeBDNQxEHQZENQxEHQZvITHCJI7ZghanOj/Msa1Pvp8z7LX70/taDDhuEAG6pppQcuMC/r1IQV9XNgB87I9Gk44LiCoayYFrTNOLujjcmvOXHs/hhOOCvjpnAlB6zL8T+9c0Orlmzz19oNlqG8/2qORhKMDgjrFIChVNinf/PylFpIfla+/ZhmT9HG50ufv7dFIwrEBP93SFZSqlQTlmUJQoe1NlvXly7f2SEmvwdUbOAaCukUXlLXKZYEtW+gk6NcH05AV51UmtWyPRhKODQjqFk3QKtOrk7WjN5mDElq+acpBewlHBvx0jCro57/2Wjtf//69L2jKdVAI6pjpflAStJUx7VY8BHWMloO+m1STddCmPppqPyh1gmKY0y26oNRO1xFFfNU07FMdSUIv/RHoRTxZqCsn66DMxu4IfFJj8ZgncgT9OqiQ1Fhur0g4GlDCH4K5kVT1M9K1CUcDSvhDGG7FPy4QVAUl/CGYBaVxTWP30dKEYwEZ6DH0BRWj8d3G/NqEYwGCHkNH0HJ71tlJOBLg50FM94NuTDgiIOgB6IJuahaZE44H+HkE/Rx0awdoJ+F4gKBH0KmDUgvJOH9uZcLxAEGPwNDNZKehFJ2g8PMQzP2gVNijo14Fgh4CRpLmAkEPYWwkCYJKMMx5GH1BC8xm6oGYi4ehC1oa5oNuTDgK2N5yyEAPASNJM0AJfxzTa5I2JhwDKOGPA/FBZ4AS/ji6gn7+Z/PV5z+jFc/kZCADPYqeoDJMw9cHupmknhD0OLqC1l7SMvitPU2xCEqSws+jMPWDvv2+Wc+YBOV10KMfJFmGJots7myKS9CjnyNdTK34ykZPPQQFNjB2M1UWZoTGIihx9HOkS38kqQWteAh6OBB0GvQxHQhGkia4M45+iISBoOOwPnoYeiDTIcA3Jhw2+fmcQ9Ajmd5EYWPCYXPn80Qg6HFMb0OzMeGw4SU8BD2Q6Y28NiYcNqIKCkEPw9BIsrMoKSpBMRn0MNCKH4M3kfKaox8kXSDoGBD0cCDoCFiLdDwQdBwIejAQdBT4eTQQdBQIejQQdBQIejT9RXOWgjdEISj8PJz+smMI2gJBD6efg1raSCEGQTGEdDy9OqitrT6CFxQRw7ygX8RjyQeBXnovgKBDIGKYF6CbaQgI6gUQdAD46QcGQVkpf32WJzsJhwoE9YO+oCXNVi42buUVg6BHPwMwCMoCMz0uVxaAMenwi4ho5wfGjnom6NZBz8AFRQbqCcYIy1zQZ5l0NxP89IMRQQsICg5nuIh/XFIu4iGoJxgaSS/fmKDVxijLgQsKPz1hoJtp+8J4CApsYOio5zt8bI4CHrag6KT3BQx1GoGgvgBBDWCY0x8M0+227hSvJxgitaDw0xN6OWiB/eIhqEcMNZI2Z6MBC8r8hKCeYK6Dbgxe208wKJCBesRgI6lqFC1oZmgrreloMOEAgaAeYRaUx7AVM5ZLOqDQy8xG09FwwuEBP32iLyhfNtdKVwhTC1YtHfwxnHB4YCaoT5hWdSpj8PXHP7H5TSLiCJsjajoaSTg44KdXDMSob7b6+IUm4IkZeGyOqOloJOHwwDC8T5jroKUyWUQKyvPVkk116h8p6TXs/OD7AUF9YrAVXzeAZEudCVplUkbT0UjCwQE/vcIsKOurlwX3shy0l3BwQFCvmB5JSqwOCj/9whibSTPuM61WPAT1i+nZTCRoMv2gENQvpueDCkHTGEnCKJJvDMRmUrQTgqYxFo9eet8YWTS3LXpYqIIiA/ULw7Jj6t2si+/0lh2jhPeOfuAG2au5cb+PUAU9+hGAjjH0DZFg6BuU8N4BQRWQgfoHiniF8/noJwBd0EiSnImjHwPoIDYTcT5DUC+Z7qjfmHAgsGAiNRDUNxD6hmA9oBDUQyAoQRsfQlDv6AhqK/BNgILeIaiPaILKjTo3Nd87CQcCGkmeogla8tyzTDF4GAT1FFVQ0Un/9WEjCw1M0JxHDMsRNMw3VEE/3ynrLG2ECA1P0ByCeoguKA1uVgkKinkingJBCfjpKRCUgKCeAkEJNN89BYJy4Kev6IJmGglNWIagvgJBGfDTWzBZhIFwIt4CQZ/w02cg6BOC+gwEhZ9eA0EhqNdAUAjqNRAUfnoNBEUnqNdAUKxD8hoICkG9JnlB4affQFAI6jWpC4pgIp6TvKDw028gKAT1msQFhZ++k7qgGEXynLQFhZ/eA0GB1yQtKPz0HwgKvCZlQXMI6j8pCwo/AyBhQXN0ggZAwoJiGD4E0hU0h6AhkK6g8DMIkhUUGWgYJCto3YSHoAGQsKDwMwQgKPCaFAVlu83Az0BIT1DaDgmjSIGQoqBPVsBjU48wSFHQOwOChkGCgt6Jo58DzCJJQXMIGgzpCcr9RCMpFNITlM2yw8bwwZCeoOczBA2IFAW9s156CBoGSQr6RA4aDBAUeM18QQu+fyfbB5nt6Un7eLZHgwl7R60m/Q+EwGxBvz6koI+L3Gm2PRpO2DfuEDQoZgv6uNzEUcEs7fwYTtg37mjFB8VsQauXb3Tw+f72g2Wobz/ao5GEPeMOQcNitqDl669ZxiR9XK70+Xt7NJKwX9yx0iMwZgtKbaTsJsv68uVbe6Sk17DDw24HI5yhMVfQrw+mISvOq0xq2R6NJOwRmKYcIAv7QbV805SD9hL2CAgaIGsEDbQOCj9DZK6grYzBtuJzTAINkPl1UJZPfr6fgu0HRQYaJPP7QXnTnPqZghxJyhPsYaI/EPW+BMr8Oih72e4IfEBj8XmKXaCtoJmxHhYAycxmSjEDrQUVXtamGiti/pOMoKwCmq6gdQ0t0Cw0JUGT81MR9POdV8VYnYxXymjg5Vlmdau3tvf0FPUBXlctXv/6nrW926WYZil+hydKl/xB5Msl//82AYukImiwGWgumPtZoytoKSqkV3Z443Mo2QX8WHzHVC1e/62ttIp5lqeuoOyS/6X06QslAYskImiwLaS8I+DUZ51OES9qoiXLHXmuWWeotbfcr8eFMlbmaqFkn/XV9RePS31GEzSjoe/2jJqARZIRNNAMdBuNoFVG4skS+USzJqvs5/o8PyzISTpWssGmLnDtCHp6PmXZzn+qCVgkDUFT7aJXupnaIlqU90yo8vW3y7XW9CoLcqqhqmMvovLK0AW9PuUxP68lYJEEBK2Lv+QF5WY1rvGDuuL59fH2f+8nXgXlradW0JuSRJMj6oLSJQWvHdQntAQskoSgqfqp2vXsCvq4nNjIdfH6P2wUW8kon0sEZbkvb2NpCVgkfkHzhCeJ6II2RbwomOtG+O1ZvvzXO28uKe0iVVBVPKpm8vaWvKSucv4upmkYZ11uJg1Bj36Go9AF1RpJrDPpP3hr/md+VrR6tOyR0c82S1XQWtq/XE7PTgIWiVrQ5KN9d2ypq6RMojITOWFGdUf56cr7na56DkrdTHUT6CrUpF9rLqlk57yagEUiFlT2EIbaBWqBbnamdNRzl05NX33zHfugCSqa5+w8tbn+XstkqSu1k4BFohb0KQt4CCpohjqfTZ960+nJ9ePqFnpne9mMD7FLbp1aQNl0mrYJWCR6QYMdQwKc2AXl+3lA0HCJWlDaziOHnwETs6BiOw8IGjJxC8odhZ8hE7GgdevoDkFDJ2JBm0iLRz8H2EDEgp4RaDECYhU0z2k7D5TwgROvoNJMCBo0kQrK+kAhaAzEKWgOQRlyet3XRzuhQx8rL3uTlxrYRNDOLOSymZyvTNYXV1TN4pLmV6qsXXzHppwMrKbrPpN+0ygFlVOYuJsJCyqjNdQykSm9NZdLBG0UFPM+M+2zWdDGPT7NxPyUSQp6F4Km3YqXf+pSTEoeWJcxT9BKzKSrMhHmQUxiKsnCqr8gvsr+pplNVQ7HdEhPULHIA4LKNR5s1js3xTzdfZagn+/yKr5GvhW09pB9Ngr6d3KRydfH3/4LBJU0fh73CJ5Qip0Bxboh6UIbo0YW8bI0VhZ4dARtp33SL7WCUlXXKOhJyve4/KOoXagzUtnOHC/fug8Vv6BR+Xmfi+mXKxF6Say8FKvelBg1QtCf5Vz4YUG72awiKD80Cyqz7PLlvz/EgqZ2Tr+Yq/+TCP4gHyp6QdP00yiojMh0k5FuKOxwG6NGCMq+5HFxBgWlCNsKiqAiSIlJUJHe10edh7P7qcF3mtVOlCE3DxW7oPS3isTPjYiYH3zdOw+fxFdzKjFqhKCiHf72Y1DQXvNKE7T+Tm/jPynBUxP37iqjPqnBd4S8ncA5kQua7iJ4EyXfeU1qKSPatf1BajcTE9m6oFTG1zfngmrBd5rivxN5J25B4acG06hqAnzxbEqLUaOG/WL22C7iSUkWwUQvvdmB/A32fOpDRS0o/NRh7hTCuRMFntP+/rMFVRtJn/+kdTORmwOC8jtUPPMcF7R9qIgFTTjIzRAsErIIMvv6G3dKi1GjFvFNzDuqjnYErdRuptPcbiZyvaDGkFLEs7NqEa8+VNyCHnBXrymzPwqTipc/iwDfSoyabiNJiW4z0lFP7fG2o55dNCRo7SQP/tRvJDUtfOUZZNbdJhKToEnHaBigHQOvZP+4GqNGdjNdpXdtdBsbQ53UC/uTaJvdOsF36CfdXXmoKAUVMW7u0fR/2qKdyFS7IcY5lRg1Wkd9s5MCj24zPFlEjJo2s0Ou9O2AoCI2ztdQR73YiaF9qAgFzeUKY/jZo5BaUlHKaWPUqEOdt+a7m6GRRGll/el2TZDxAUFF6f1lGuosu0OdNDIbn6DwM1piEfRJy4/gZ2xEIej9nvzMumiJQlDM/IyXGAS90wJj+Bkj4QvK1YSgsRK6oEpsBggaI2ELKmbqQtB4CVpQrmd+RhspYgIWVOaeEDRmghW0GTqCl8MYxh/7dJf9Ph//YDorErQQLGQRgQoKPWexStCqXe9pSNBCsJBFhCYomXmXK+Og5yizBF3yS1aChSwiMEHlmCafmJzTRjNgkB0EtRAsZBFhCao3h+DnFLprA0E9SjHhWMwILeiglPPxtM3jrAQLWURogt4xZrQATVB1rjCtoqS5wsJSOblTFVSsBtZWEm8PFrKIAAVNq2XU7UKb+qyhCjoY1KNdtEaTipVGEr+MgoU1CW4PFrKIoATlg+5pNd27fbxTn3VUQQ1BPdp1SfriIymocFGpUVoJFrKIkASV0z5RxM9FEbQT1EOs9JSCskxPOtQK2vfKSrCQRYQjqJgyz+SEoDNRBDXGTGgbSbTEiF/SCtoPJ2olWMgighG07ZlPqojfxnxBZZPmOi3o5mAhiwhE0LZnHoIuwFTEU1CPvqBPuUJ4qojfHCxkEUEI2sS/5D2fOTro5zK7kSQQceo6jSQlI7USLGQRIQjahmdlZuYQdDadbiY1qIfezURdQhRXhHxsu5mUBfV2goUsYpugrCI8cGtrgqqriXOyE4LOpN0b5mbsUG8Epe55mqrE2kt6R31bE7USLGQRmwRVmn6DCauY648DtUpxWuv3FLknBJ2JJmhvSJINW8ow4HSprEHWB0rT6aQmaCFYyCI2CVrQvz3TvCxDguYGzkCzR57Wx41yyZqnBT0KJRKjp2wRlAKifn2Y9t4xCmoaRx9YkSlP1yhGQlA7iEZSNVQ/84gtgj4uVAoY39IoqJIzCs6dE2ftROMnjLRLoZT8frNNUNoMSi0nmkqPSVClI9Poo/oZS913pRpuPfjFFkGrrC9oL+EWmmZsKOINZ4dOg9SwnYP2Em5ZVQdd8VggJpzWQVe04lc8FogJp614CAqW4rAfFIDlOB1JAmAp/o/Fg6QJYTYTSBgICrwGggKvgaDAayAo8BoICrwGggKv2U9QAGywl6Cucf0Czv+DRX/D8ftBUM/vF/8NIWjQ94v/hhA06PvFf0MIGvT94r8hBA36fvHfEIIGfb/4bwhBg75f/DeEoEHfL/4bRi4oiBsICrwGggKvgaDAayAo8BoICrwGggKvgaDAayAo8BoICrwGggKvgaDAa8IWlDatMMYp3eNutLPVSGi/fW7o6C15UM1mh67937C939gLBi2o2LHPkaCl3CSV3dOFoeKGjt5S7E53dfWG7f1GXzBoQcVuDm4oMrkd4HB46V1u6OYtacNivsWXkzdU7jf6gkELWrnb0a8u9f70ThuqjgTo3+OGjt5S7IxRvH5384bt/cZfMGhBy9dfaaPe/fn8pVaG+TK6xckeN3T5lrUwbz9cvaG83/gLBi2o2NjPUTkvBR3ZJGqPGzp9y8/3q8s35Pcbf8GQBaVqzP6lrYB8Gd1mb48bunzLr4+T0zfk9xt/wZAFFTj5p/48Lgcl3PjCCnd3b0j3EwzcD4LOxm0d9OleUGGmszfUW+8RCuq0Ni99cdWKfzr/FyEb067eUN5v/AVDFvTrg72Tls/sSdNmcdQP2tRB3bxl29nj5g2b+42/YMiCisEIVz0w4j+hu5EkcUM3b8mGN8WLOXlD5X6jLxi0oPw/paMCvv037mwsXt7QyVuKkceMcjNnI538PmMvGLagIHogKPAaCAq8BoICr4GgwGsgKPAaCAq8BoICr4GgwGsgKPAaCAq8BoICr4GgwGsgKPAaCAq8BoICr4GgwGsgKPAaCAq8BoICr4GgwGsgKPAaCAq8BoKOIwNsfH3IldtlfaY0h90YOD0fPYFqaK14oUWlKR1F9zsGCDpOldGf/3ERoS9qU29uBOWxM010osQMXhcFEHScz3fKxsrsZ5JHnjBhV9Bi6EbdmO6uwvsdAgQdh6Kr1ra8/OXC89LHZbhEtSqoCPpmuqpjrrPwaUcAQScgZz7f337nQdjoM/vB1C2amFf8SPWLxx4S4fBuVbvLSrs7kH7cS6DgKde/zK66igvYFxQYsU1fXhonEHSCKqPA36xlxFziMpCgWROVTRz/1PpV0pdMpaKuHchjef701I/7CVCUzuaXb0UTAY7XOZX06eliBYJOQHVOJidXVX4kQW/s54l9rs+yE9fmt4S3N7nfUZ0P8j2y2K/TefW4l4CUrsgox2Zu1t+zcyywppp+I3OUQNAJeCWUx1jlGjwuLMMTgnJdavtIF3mGoTalCsrneH+AKIx5UspxPwGRX9e/TGGd+SfKzQv+LGo9lELAxgkEnYKZQloyo8gbISg7ZI0m2XBqq5AsM5TSFKQas0hWC9iX6nE/AflbhagC88T4Y4idMdSImrIlFyMQdApmBZW3TB/K9mQj6UmCVqK1otQFlSjFhWzbvHyTYYXZN+qxIQHxW+SpKih1MulRkCNuJUHQKVgRXAgXT6K2Ny2obMZcO4K22Z56vERQ2evZpP+EoGlTvP6VtKwL6d8uov2tCWoooTl1Jsn3ZhUtGZZrtiapx2NFfEdQdfcNSh9FfOKU2R8vYuP2lz+LXdh0QcWh2sYhuFjUzhGNJLmBsX5sSKAcEFQb2BTn0UhKGlbdo970Stb6OoLWn9lx0fYSURdSfZ6LKDZhv/EUrjznu+rHvQRkqd8TtBJ3bdNHN1PitBOZasnaolgVlFrkL39QS+imF7/Ifup1zqud9rRtVjeBpqO+I6gYoVfSR0d96oiOTKUI7goqutJ7Q53SsaozvHntH/cSaIY6n6qgvJNJTz/qNhIE3Z9i3U7aw5NFumCyCNjCSkGHp9t1wXQ7sIW1gs6diBx1BgpB92etoMNLPnSw5AOAw4CgwGsgKPCa/wf01oyVtCwNHgAAAABJRU5ErkJggg==" /><!-- --></p>
+<p>Similarly, user can compare various techniques used for wind turbine power curve fitting.</p>
+<ul>
+<li>Dataset [2] on the power curves of wind turbine from four major manufacturers: Siemens, Vestas, REpower and Nordex. These datsset represent wind turbine power output in ‘kW’ against wind speed in ‘metres per second’ as shown below:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(pcurves)
+pcurves
+<span class="co">#&gt;    Speed Vestad V80 Vestad V164 Siemens 82 Siemens 107 Repower 82</span>
+<span class="co">#&gt; 1      1          0           0          0           0          0</span>
+<span class="co">#&gt; 2      2          0           0          0           0          0</span>
+<span class="co">#&gt; 3      3          0           0          0           0          0</span>
+<span class="co">#&gt; 4      4          2         101         42          80         64</span>
+<span class="co">#&gt; 5      5         97         461        136         238        159</span>
+<span class="co">#&gt; 6      6        255         902        276         474        314</span>
+<span class="co">#&gt; 7      7        459        1595        470         802        511</span>
+<span class="co">#&gt; 8      8        726        2513        727        1234        767</span>
+<span class="co">#&gt; 9      9       1004        3737       1043        1773       1096</span>
+<span class="co">#&gt; 10    10       1330        4988       1394        2379       1439</span>
+<span class="co">#&gt; 11    11       1627        5987       1738        2948       1700</span>
+<span class="co">#&gt; 12    12       1772        6698       2015        3334       1912</span>
+<span class="co">#&gt; 13    13       1797        6984       2183        3515       2000</span>
+<span class="co">#&gt; 14    14       1802        6985       2260        3577       2040</span>
+<span class="co">#&gt; 15    15       1802        6995       2288        3594       2050</span>
+<span class="co">#&gt; 16    16       1802        6995       2297        3599       2050</span>
+<span class="co">#&gt; 17    17       1802        6995       2299        3600       2050</span>
+<span class="co">#&gt; 18    18       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 19    19       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 20    20       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 21    21       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 22    22       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 23    23       1802        6995       2300        3600       2050</span>
+<span class="co">#&gt; 24    24       1800        6995       2300        3600       2050</span>
+<span class="co">#&gt; 25    25       1800        6995       2300        3600       2050</span>
+<span class="co">#&gt;    Nordex N90</span>
+<span class="co">#&gt; 1           0</span>
+<span class="co">#&gt; 2           0</span>
+<span class="co">#&gt; 3           0</span>
+<span class="co">#&gt; 4          35</span>
+<span class="co">#&gt; 5         175</span>
+<span class="co">#&gt; 6         352</span>
+<span class="co">#&gt; 7         580</span>
+<span class="co">#&gt; 8         870</span>
+<span class="co">#&gt; 9        1237</span>
+<span class="co">#&gt; 10       1623</span>
+<span class="co">#&gt; 11       2012</span>
+<span class="co">#&gt; 12       2230</span>
+<span class="co">#&gt; 13       2300</span>
+<span class="co">#&gt; 14       2300</span>
+<span class="co">#&gt; 15       2300</span>
+<span class="co">#&gt; 16       2300</span>
+<span class="co">#&gt; 17       2300</span>
+<span class="co">#&gt; 18       2300</span>
+<span class="co">#&gt; 19       2300</span>
+<span class="co">#&gt; 20       2300</span>
+<span class="co">#&gt; 21       2300</span>
+<span class="co">#&gt; 22       2300</span>
+<span class="co">#&gt; 23       2300</span>
+<span class="co">#&gt; 24       2300</span>
+<span class="co">#&gt; 25       2300</span></code></pre></div>
+<ul>
+<li>Further, <code>WindCurves</code> package provides feature to extract/capture Speed Vs Power discrete points from power curve image. This can be achieved with the following simple instruction:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#img2points(&quot;image.jpeg&quot;)</span></code></pre></div>
+<p>where, <code>image.jpeg</code> is the name of power curve image from which discrete points are to extracted. The procedure of extraction is as follows:</p>
+<ul>
+<li>With the command <code>img2points(&quot;image.jpeg&quot;)</code>, an image will get appeared in the Viewer.</li>
+<li>Click on leftmost point of the X-axis of the curve image and assign the respective appropriate value.</li>
+<li>click on rightmost point on X-axix, downmost point of Y-axis and topmost point of Y-axis, and assign their values, respectively.</li>
+<li>click of the points on the curve image. By default, 15 points can be captured from the curve image, but user can set the desired number of points with <code>n</code> parameter in <code>img2points()</code> function.</li>
+<li>This function returns a data.frame with two columns, i.e., wind speed and wind power, which can be used as input data for <code>fitcurve()</code> function.</li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<blockquote>
+<p>[1] D. Villanueva and A. E. Feij´oo, “Reformulation of parameters of the logistic function applied to power curves of wind turbines,” Electric Power Systems Research, vol. 137, pp. 51–58, 2016.(<a href="https://www.sciencedirect.com/science/article/pii/S0378779616300992">via</a>)</p>
+</blockquote>
+<blockquote>
+<p>[2] Iain Staffell, “Wind turbine power curves, 2012” (<a href="https://goo.gl/tD2JW6">via</a>)</p>
+</blockquote>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

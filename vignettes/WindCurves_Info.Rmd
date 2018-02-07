@@ -1,0 +1,139 @@
+---
+title: "WindCurves: A Tool to Fit Wind Turbine Power Curves"
+author: "Neeraj Bokde (neerajdhanraj@gmail.com) and Andres Feijoo (afeijoo@uvigo.es)"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction:
+
+This is a Vignettes of R package, `WindCurves`. The package `WindCurves` is a tool used to fit the wind turbine power curves. It can be useful for researchers, data analysts/scientist, practitioners, statistians and students working on wind turbine power curves. The salient features of `WindCurves` package are:
+
+- Fit the power curve with Weibull CDF, Logistic [1] and user defined techniques.
+- Comparison and visualization of the performance of curve fitting techniques.
+- Utilise as a Testbench to compare performace of user defined curve fitting techniques with user defined error measures.
+- Availability of Dataset [2] on the power curves of wind turbine from four major manufacturers: Siemens, Vestas, REpower and Nordex.
+- Feature to extract/capture Speed Vs Power discrete points from power curve image
+
+## Instructions to Use:
+
+- A power curve can be fitted with the `WindCurves` package from a discrete samples of wind turbine power curves provided by turbine manufacurers as:
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+library(WindCurves)
+data(pcurves)
+s <- pcurves$Speed
+p <- pcurves$`Nordex N90`
+da <- data.frame(s,p)
+x <- fitcurve(da)
+x
+validate.curve(x)
+plot(x)
+```
+
+
+
+
+- User can utilize `WindCurves` package as a testbench so that a new curve fitting technique can be compared with above mentioned existing environment.  
+
+- - The user defined function (similar to `random()`) should be saved in .R format and it should return the fitted values in terms of "Power values". The `random()` function used in this example is stored as .R file with `dump()` function and made available in the `WindCurves` package and written as:
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+random <- function(x)
+{
+  data_y <- sort(sample(1:1500, size = 25, replace = TRUE))
+  d <- data.frame(data_y)
+  return(d)
+}
+dump("random")
+rm(random)
+```
+
+- A `random()` function is attached in the comparison the parameters `MethodPath` and `MethodName` as shown below, where `MethodPath` is a location of the function proposed by the user and `MethodName` is a name given to the function.
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+library(WindCurves)
+data(pcurves)
+s <- pcurves$Speed
+p <- pcurves$`Nordex N90`
+da <- data.frame(s,p)
+x <- fitcurve(data = da, MethodPath = "source('dumpdata.R')", MethodName = "Random values")
+
+## The user can specify .R files from other locations as:
+# x <- fitcurve(data = da, MethodPath = "source('~/WindCurves/R/random.R')", MethodName = "Random values")
+validate.curve(x)
+plot(x)
+```
+
+- Also, `WindCurves` allows user to add more error measures with `validate.curve()` function as explained below:
+
+Consider `error()` is a function which uses two vectors as input and returns a error value with a specific error measure, such as RMSE or MAPE as shown below:
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+# PCV as an error metric
+error <- function(a,b)
+{
+d <- (var(a) - var(b)) * 100/ var(a)
+d <- as.numeric(d)
+return(d)
+}
+dump("error")
+rm(error)
+```
+
+The effect of this function can be seen in the results obtained with `Validate.curve()` function as:
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+library(WindCurves)
+data(pcurves)
+s <- pcurves$Speed
+p <- pcurves$`Nordex N90`
+da <- data.frame(s,p)
+x <- fitcurve(da)
+validate.curve(x = x, MethodPath = "source('dumpdata.R')", MethodName = "New Error")
+plot(x)
+```
+
+Similarly, user can compare various techniques used for wind turbine power curve fitting.
+
+- Dataset [2] on the power curves of wind turbine from four major manufacturers: Siemens, Vestas, REpower and Nordex. These datsset represent wind turbine power output in 'kW' against wind speed in 'metres per second' as shown below:
+
+```{r, fig.show='hold', fig.height=5, fig.width=9}
+data(pcurves)
+pcurves
+```
+
+- Further, `WindCurves` package provides feature to extract/capture Speed Vs Power discrete points from power curve image. This can be achieved with the following simple instruction:
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+#img2points("image.jpeg")
+```
+
+where, `image.jpeg` is the name of power curve image from which discrete points are to extracted. The procedure of extraction is as follows:
+
+- With the command `img2points("image.jpeg")`, an image will get appeared in the Viewer.
+- Click on leftmost point of the X-axis of the curve image and assign the respective appropriate value.
+- click on rightmost point on X-axix, downmost point of Y-axis and topmost point of Y-axis, and assign their values, respectively.
+- click of the points on the curve image. By default, 15 points can be captured from the curve image, but user can set the desired number of points with `n` parameter in `img2points()` function.
+- This function returns a data.frame with two columns, i.e., wind speed and wind power, which can be used as input data for `fitcurve()` function.
+
+
+
+
+
+## References
+
+> [1] D. Villanueva and A. E. Feij´oo, “Reformulation of parameters of the logistic function applied to power curves of wind turbines,” Electric Power Systems Research, vol. 137, pp. 51–58, 2016.([via](https://www.sciencedirect.com/science/article/pii/S0378779616300992))
+
+> [2] Iain Staffell, “Wind turbine power curves, 2012” ([via](https://goo.gl/tD2JW6))
