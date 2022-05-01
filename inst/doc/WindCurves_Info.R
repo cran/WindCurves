@@ -1,10 +1,10 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 library(WindCurves)
 data(pcurves)
 s <- pcurves$Speed
@@ -15,7 +15,7 @@ x
 validate.curve(x)
 plot(x)
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 random <- function(x)
 {
   data_y <- sort(sample(1:1500, size = 25, replace = TRUE))
@@ -25,7 +25,7 @@ random <- function(x)
 dump("random")
 rm(random)
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 library(WindCurves)
 data(pcurves)
 s <- pcurves$Speed
@@ -38,7 +38,7 @@ x <- fitcurve(data = da, MethodPath = "source('dumpdata.R')", MethodName = "Rand
 validate.curve(x)
 plot(x)
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 # PCV as an error metric
 error <- function(a,b)
 {
@@ -49,7 +49,7 @@ return(d)
 dump("error")
 rm(error)
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 library(WindCurves)
 data(pcurves)
 s <- pcurves$Speed
@@ -59,10 +59,10 @@ x <- fitcurve(da)
 validate.curve(x = x, MethodPath = "source('dumpdata.R')", MethodName = "New Error")
 plot(x)
 
-## ---- fig.show='hold', fig.height=5, fig.width=9-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=9------------------------------
 data(pcurves)
 pcurves
 
-## ---- fig.show='hold', fig.height=5, fig.width=7-------------------------
+## ---- fig.show='hold', fig.height=5, fig.width=7------------------------------
 #img2points("image.jpeg")
 

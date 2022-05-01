@@ -1,0 +1,20 @@
+citHeader("To cite WindCurves in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Wind turbine power curves based on the weibull cumulative distribution function",
+  author   = personList(as.person("Neeraj Bokde"),
+                   as.person("Andres Feijoo"), 
+                   as.person("Daniel Villanueva")),
+  journal  = "Applied Sciences",
+  year     = "2018",
+  volume   = "8",
+  number   = "10",
+  pages    = "1757",
+  publisher= "Multidisciplinary Digital Publishing Institute",
+  textVersion = paste(
+        "Bokde N, Feijoo A, Villanueva D (2018).",
+        "Wind turbine power curves based on the weibull cumulative distribution function.",
+        "Applied Sciences, 8(10), 1757."
+  )
+)

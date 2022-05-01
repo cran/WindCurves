@@ -4,7 +4,9 @@
 \name{pcurves}
 \alias{pcurves}
 \title{Wind Turbine Power Curves}
-\format{An object of class \code{data.frame} with 25 rows and 7 columns.}
+\format{
+An object of class \code{data.frame} with 25 rows and 7 columns.
+}
 \source{
 \url{https://goo.gl/tD2JW6}
 }

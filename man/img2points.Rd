@@ -18,9 +18,9 @@ data.frame with two columns, i.e., wind speed and wind power
 A function to capture Speed Vs Power discrete points from power curve image
 }
 \examples{
-\donttest{
+\dontrun{
 # to import image from system 'extdata' folder.
-# user cab directly specify the path of the image in 'img2points()'.
+# user can directly specify the path of the image in 'img2points()'.
 imagePath <- system.file("extdata","powercurve.jpeg", package="WindCurves")
 img2points(imagePath)}
 }

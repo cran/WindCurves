@@ -4,7 +4,7 @@ author: "Neeraj Bokde (neerajdhanraj@gmail.com) and Andres Feijoo (afeijoo@uvigo
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{WindCurves: A Tool to Fit Wind Turbine Power Curves}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
